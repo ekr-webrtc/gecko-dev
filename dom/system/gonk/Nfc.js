@@ -26,7 +26,7 @@ let NFC = {};
 Cu.import("resource://gre/modules/nfc_consts.js", NFC);
 
 Cu.import("resource://gre/modules/systemlibs.js");
-const NFC_ENABLED = libcutils.property_get("ro.moz.nfc.enabled", "false") === "true";
+const NFC_ENABLED = false;
 
 // set to true in nfc_consts.js to see debug messages
 let DEBUG = NFC.DEBUG_NFC;

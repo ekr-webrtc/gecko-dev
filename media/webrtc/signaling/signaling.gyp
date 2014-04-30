@@ -38,6 +38,7 @@
       'include_dirs': [
         '..',
         './src',
+        './test',
         './src/callcontrol',
         './src/common',
         './src/common/browser_logging',
@@ -84,6 +85,9 @@
         './src/media-conduit/AudioConduit.cpp',
         './src/media-conduit/VideoConduit.h',
         './src/media-conduit/VideoConduit.cpp',
+        './src/media-conduit/EventTimer.h',
+        './src/media-conduit/VideoBenchmark.h',
+        './src/media-conduit/VideoBenchmark.cpp',
         # Common
         './src/common/CommonTypes.h',
         './src/common/csf_common.h',
