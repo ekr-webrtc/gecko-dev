@@ -573,6 +573,9 @@ protected:
       encoded.capture_time_ms_ = aInputFrame.mRenderTimeMs;
       encoded._completeFrame = true;
 
+      ALOGE("OMX:%p encode frame type:%d size:%u timestamp=%u pop=%s", mOMX, encoded._frameType, encoded._length, aInputFrame.mTimestamp,
+	    isParamSets ? "false" : "true");
+
       // Prepend SPS/PPS to I-frames unless they were sent last time.
       SendEncodedDataToCallback(encoded, isIFrame && !mIsPrevOutputParamSets);
       mIsPrevOutputParamSets = isParamSets;
@@ -821,6 +824,8 @@ WebrtcOMXH264VideoDecoder::Decode(const webrtc::EncodedImage& aInputImage,
   if (aInputImage._length== 0 || !aInputImage._buffer) {
     return WEBRTC_VIDEO_CODEC_ERROR;
   }
+
+  ALOGE("WebrtcOMXH264VideoDecoder:%p will decode len = %d", this, aInputImage._length);
 
   bool configured = !!mOMX;
   if (!configured) {
