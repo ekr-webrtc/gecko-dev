@@ -154,13 +154,13 @@ public:
   }
 private:
   static int32_t GetDefWidth(bool aHD = false) {
-    return aHD ? MediaEngine::DEFAULT_169_VIDEO_WIDTH :
-                 MediaEngine::DEFAULT_43_VIDEO_WIDTH;
+    return aHD ? +MediaEngine::DEFAULT_169_VIDEO_WIDTH :
+                 +MediaEngine::DEFAULT_43_VIDEO_WIDTH;
   }
 
   static int32_t GetDefHeight(bool aHD = false) {
-    return aHD ? MediaEngine::DEFAULT_169_VIDEO_HEIGHT :
-                 MediaEngine::DEFAULT_43_VIDEO_HEIGHT;
+    return aHD ? +MediaEngine::DEFAULT_169_VIDEO_HEIGHT :
+                 +MediaEngine::DEFAULT_43_VIDEO_HEIGHT;
   }
 };
 
