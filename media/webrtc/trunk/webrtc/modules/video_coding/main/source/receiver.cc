@@ -89,6 +89,10 @@ int32_t VCMReceiver::InsertPacket(const VCMPacket& packet,
   const VCMFrameBufferEnum ret = jitter_buffer_.InsertPacket(packet,
                                                              &retransmitted);
   if (ret == kOldPacket) {
+    WEBRTC_TRACE(webrtc::kTraceError, webrtc::kTraceVideoCoding,
+                 VCMId(vcm_id_, receiver_id_),
+                 "EKR: packet too old");
+
     return VCM_OK;
   } else if (ret == kFlushIndicator) {
     return VCM_FLUSH_INDICATOR;
@@ -99,6 +103,11 @@ int32_t VCMReceiver::InsertPacket(const VCMPacket& packet,
                  packet.seqNum, packet.timestamp);
     return VCM_JITTER_BUFFER_ERROR;
   }
+
+  WEBRTC_TRACE(webrtc::kTraceError, webrtc::kTraceVideoCoding,
+	       VCMId(vcm_id_, receiver_id_),
+	       "EKR: packet inserted");
+
   if (ret == kCompleteSession && !retransmitted) {
     // We don't want to include timestamps which have suffered from
     // retransmission here, since we compensate with extra retransmission
