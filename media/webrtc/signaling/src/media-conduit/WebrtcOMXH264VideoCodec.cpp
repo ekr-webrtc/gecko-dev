@@ -402,6 +402,7 @@ public:
   // buffers back to native window for rendering.
   void OnNewFrame() MOZ_OVERRIDE
   {
+    CODEC_LOGE("Decoded frame");
     RefPtr<layers::TextureClient> buffer = mNativeWindow->getCurrentBuffer();
     MOZ_ASSERT(buffer != nullptr);
 
@@ -573,7 +574,7 @@ protected:
       encoded.capture_time_ms_ = aInputFrame.mRenderTimeMs;
       encoded._completeFrame = true;
 
-      ALOGE("OMX:%p encode frame type:%d size:%u timestamp=%u pop=%s", mOMX, encoded._frameType, encoded._length, aInputFrame.mTimestamp,
+      CODEC_LOGE("OMX:%p encode frame type:%d size:%u timestamp=%u pop=%s", mOMX, encoded._frameType, encoded._length, aInputFrame.mTimestamp,
 	    isParamSets ? "false" : "true");
 
       // Prepend SPS/PPS to I-frames unless they were sent last time.
@@ -628,8 +629,10 @@ private:
           nalu._timeStamp -= 50;
           break;
         default:
+	  CODEC_LOGE("Emit frame");
           break;
       }
+      CODEC_LOGE("Emit NAL");
       mCallback->Encoded(nalu, nullptr, nullptr);
     }
   }
@@ -656,7 +659,7 @@ WebrtcOMXH264VideoEncoder::InitEncode(const webrtc::VideoCodec* aCodecSettings,
                                       int32_t aNumOfCores,
                                       uint32_t aMaxPayloadSize)
 {
-  CODEC_LOGD("WebrtcOMXH264VideoEncoder:%p init", this);
+  CODEC_LOGE("WebrtcOMXH264VideoEncoder:%p init OMX", this);
 
   if (mOMX == nullptr) {
     nsAutoPtr<OMXVideoEncoder> omx(OMXCodecWrapper::CreateAVCEncoder());
@@ -710,6 +713,7 @@ WebrtcOMXH264VideoEncoder::Encode(const webrtc::I420VideoFrame& aInputImage,
   layers::PlanarYCbCrImage img(nullptr);
   img.SetDataNoCopy(yuvData);
 
+  CODEC_LOGE("Encoding frame");
   nsresult rv = mOMX->Encode(&img,
                              yuvData.mYSize.width,
                              yuvData.mYSize.height,
@@ -806,7 +810,7 @@ int32_t
 WebrtcOMXH264VideoDecoder::InitDecode(const webrtc::VideoCodec* aCodecSettings,
                                       int32_t aNumOfCores)
 {
-  CODEC_LOGD("WebrtcOMXH264VideoDecoder:%p init OMX:%p", this, mOMX.get());
+  CODEC_LOGE("WebrtcOMXH264VideoDecoder:%p init OMX:%p", this, mOMX.get());
 
   // Defer configuration until SPS/PPS NALUs (where actual decoder config
   // values can be extracted) are received.
@@ -825,7 +829,7 @@ WebrtcOMXH264VideoDecoder::Decode(const webrtc::EncodedImage& aInputImage,
     return WEBRTC_VIDEO_CODEC_ERROR;
   }
 
-  ALOGE("WebrtcOMXH264VideoDecoder:%p will decode len = %d", this, aInputImage._length);
+  CODEC_LOGE("WebrtcOMXH264VideoDecoder:%p will decode len = %d", this, aInputImage._length);
 
   bool configured = !!mOMX;
   if (!configured) {
