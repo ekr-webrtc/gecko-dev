@@ -637,10 +637,10 @@ private:
       // TODO: remove when bug 985254 lands. The patch there has same workaround.
       switch (nalStart[0] & 0x1f) {
         case 7:
-          nalu._timeStamp -= 100;
+          nalu._timeStamp = aEncodedImage._timeStamp - 100;
           break;
         case 8:
-          nalu._timeStamp -= 50;
+          nalu._timeStamp = aEncodedImage._timeStamp - 50;
           break;
         default:
 	  CODEC_LOGE("Emit frame");
