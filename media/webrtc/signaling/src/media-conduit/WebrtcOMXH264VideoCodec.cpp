@@ -627,6 +627,7 @@ private:
     size_t size = aEncodedImage._length;
     const uint8_t* nalStart = nullptr;
     size_t nalSize = 0;
+    
     while (getNextNALUnit(&data, &size, &nalStart, &nalSize, true) == OK) {
       nalu._buffer = const_cast<uint8_t*>(nalStart);
       nalu._length = nalSize;
@@ -842,7 +843,7 @@ WebrtcOMXH264VideoDecoder::Decode(const webrtc::EncodedImage& aInputImage,
     return WEBRTC_VIDEO_CODEC_ERROR;
   }
 
-  CODEC_LOGE("WebrtcOMXH264VideoDecoder:%p will decode len = %d", this, aInputImage._length);
+  CODEC_LOGE("WebrtcOMXH264VideoDecoder:%p will decode len = %d NAL type=%u", this, aInputImage._length, aInputImage._buffer[0] & 0x1f);
 
   bool configured = !!mOMX;
   if (!configured) {
@@ -873,7 +874,7 @@ WebrtcOMXH264VideoDecoder::Decode(const webrtc::EncodedImage& aInputImage,
     status_t err = mOMX->FillInput(aInputImage, !configured, aRenderTimeMs);
     feedFrame = (err == -EAGAIN); // No input buffer available. Try again.
   }
-
+  
   return WEBRTC_VIDEO_CODEC_OK;
 }
 
