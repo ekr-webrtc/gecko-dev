@@ -18,7 +18,6 @@ DATA = {
     "decoded":0
 }
 
-script = "b2g-benchmark.sh"
 
 DK = DATA.keys()
 
@@ -54,10 +53,13 @@ class CollectorThread(threading.Thread):
             if not self.initialized:
                 continue
 
+            if args.debug:
+                debug.write(l)
+
             m = re.search(": (2014.*) UTC - (.*)", l)
             if m is None:
                 continue
-                
+            
             ts = datetime.datetime.strptime(m.group(1), TIMEFMT)
             if FIRST_TIME is None:
                 FIRST_TIME = ts
@@ -105,6 +107,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--no-recv', dest='no_recv', action='store_true',
                     default=False, help="Don't receive")
 parser.add_argument('--out', dest="out", default=None)
+parser.add_argument('--debug', dest="debug", default=None)
+parser.add_argument('--frames',dest="frames", default=300, type=int)
+parser.add_argument('--file',dest='file',default='/data/niklas_176x144_30.y4m')
 
 args = parser.parse_args()
 
@@ -112,15 +117,25 @@ if args.out is not None:
     outfile = open(args.out, "w")
     outfile.write("TIME\t%s\n"%"\t".join(DK))
 
-if args.no_recv:
-    script = "b2g-benchmark-send.sh"
-
+if args.debug is not None:
+    debug = open(args.debug, "w")
+    
 thr = CollectorThread()
 thr.start()    
 
 time.sleep(2)
 
-subprocess.call(["adb", "shell", "sh", "/data/%s"%script])
+cargs = ["adb", "shell", "sh", "/data/b2g-benchmark.sh","-video-benchmark-file", args.file]
+
+if not args.no_recv:
+    cargs.append("-video-benchmark-receive")
+
+cargs.append("-video-benchmark-frames")
+cargs.append("%d"%args.frames)
+
+print " ".join(cargs)
+
+subprocess.call(cargs)
 
 print "Waiting"
 
