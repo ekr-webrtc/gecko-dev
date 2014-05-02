@@ -5,7 +5,7 @@
 #include "CSFLog.h"
 
 #include "WebrtcOMXH264VideoCodec.h"
-
+#include <iostream>
 // Android/Stagefright
 #include <avc_utils.h>
 #include <binder/ProcessState.h>
@@ -222,6 +222,8 @@ public:
     , mStarted(false)
     , mDecodedFrameLock("WebRTC decoded frame lock")
     , mCallback(aCallback)
+    , mDecodedFrameCt(0)
+    , mStartTime(0)
   {
     // Create binder thread pool required by stagefright.
     android::ProcessState::self()->startThreadPool();
@@ -282,6 +284,7 @@ public:
     }
     status_t result = mCodec->configure(config, surface, nullptr, 0);
     if (result == OK) {
+      mStartTime = PR_IntervalNow();
       result = Start();
     }
     return result;
@@ -322,6 +325,7 @@ public:
       flags = (nalType == kNALTypeSPS || nalType == kNALTypePPS) ?
               MediaCodec::BUFFER_FLAG_CODECCONFIG : MediaCodec::BUFFER_FLAG_SYNCFRAME;
     }
+    CODEC_LOGE("DECODETIME IN= %llu",inputTimeUs);
     err = mCodec->queueInputBuffer(index, 0, size, inputTimeUs, flags);
     if (err == OK && !(flags & MediaCodec::BUFFER_FLAG_CODECCONFIG)) {
       if (mOutputDrain == nullptr) {
@@ -380,6 +384,12 @@ public:
         return OK;
     }
 
+    if (!mDecodedFrameCt) {
+      PRIntervalTime now = PR_IntervalNow();
+      std::cerr << "First frame output delay " <<  PR_IntervalToMilliseconds(now - mStartTime) << std::endl;
+    }
+    ++mDecodedFrameCt;
+    CODEC_LOGE("DECODETIME OUT = %llu",outTime);
     if (mCallback) {
       {
         // Store info of this frame. OnNewFrame() will need the timestamp later.
@@ -403,6 +413,7 @@ public:
   void OnNewFrame() MOZ_OVERRIDE
   {
     CODEC_LOGE("Decoded frame");
+									     
     RefPtr<layers::TextureClient> buffer = mNativeWindow->getCurrentBuffer();
     MOZ_ASSERT(buffer != nullptr);
 
@@ -522,6 +533,8 @@ private:
 
   Mutex mDecodedFrameLock; // To protect mDecodedFrames.
   std::queue<EncodedFrame> mDecodedFrames;
+  uint32_t mDecodedFrameCt;
+  PRIntervalTime mStartTime;
 };
 
 class EncOutputDrain : public OMXOutputDrain
