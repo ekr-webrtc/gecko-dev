@@ -3,6 +3,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "CSFLog.h"
+#include <iostream>
 
 #include "WebrtcOMXH264VideoCodec.h"
 #include <iostream>
@@ -283,6 +284,8 @@ public:
       surface = new Surface(mNativeWindow->getBufferQueue());
     }
     status_t result = mCodec->configure(config, surface, nullptr, 0);
+    std::cerr << "EKR: Configured media codec\n";
+
     if (result == OK) {
       mStartTime = PR_IntervalNow();
       result = Start();
