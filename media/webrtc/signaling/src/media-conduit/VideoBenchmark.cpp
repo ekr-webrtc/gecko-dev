@@ -274,7 +274,7 @@ class Benchmark {
     CODEC_LOGE("Inserting frame");
 
     //printf("\n");
-    int err = sender_->SendVideoFrame(reader_.frame(),
+    MediaConduitErrorCode err = sender_->SendVideoFrame(reader_.frame(),
                                       reader_.frame_size(),
                                       width_,
                                       height_,
@@ -318,7 +318,7 @@ class Benchmark {
     if (!external_decoder_)
       return false;
 
-    int err = receiver_->SetExternalRecvCodec(124, external_decoder_);
+    MediaConduitErrorCode err = receiver_->SetExternalRecvCodec(124, external_decoder_);
     if (err != mozilla::kMediaConduitNoError)
       return false;
 
@@ -387,7 +387,7 @@ class Benchmark {
 
     std::cerr << "Created external encoder\n";
 
-    int err = sender_->SetExternalSendCodec(124, external_encoder_);
+    MediaConduitErrorCode err = sender_->SetExternalSendCodec(124, external_encoder_);
     if (err != mozilla::kMediaConduitNoError)
       return false;
     
