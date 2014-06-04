@@ -318,12 +318,12 @@ class Benchmark {
     if (!external_decoder_)
       return false;
 
-    MediaConduitErrorCode err = receiver_->SetExternalRecvCodec(124, external_decoder_);
+    mozilla::VideoCodecConfig cinst1(120, "VP8", 0);
+    mozilla::VideoCodecConfig cinst2(124, "I420", 0);
+    MediaConduitErrorCode err = receiver_->SetExternalRecvCodec(&cinst2, external_decoder_);
     if (err != mozilla::kMediaConduitNoError)
       return false;
 
-    mozilla::VideoCodecConfig cinst1(120, "VP8", 0);
-    mozilla::VideoCodecConfig cinst2(124, "I420", 0);
     std::vector<mozilla::VideoCodecConfig*> configs;
     configs.push_back(&cinst1);
     configs.push_back(&cinst2);
@@ -384,16 +384,16 @@ class Benchmark {
     external_encoder_ = OMXVideoCodec::CreateEncoder(OMXVideoCodec::CODEC_H264);
     if (!external_encoder_)
       return false;
-
     std::cerr << "Created external encoder\n";
 
-    MediaConduitErrorCode err = sender_->SetExternalSendCodec(124, external_encoder_);
-    if (err != mozilla::kMediaConduitNoError)
-      return false;
-    
     std::cerr << "Set send codec encoder\n";
     //mozilla::VideoCodecConfig cinst1(120, "VP8", 0);
     mozilla::VideoCodecConfig cinst1(124, "I420", 0);
+
+    MediaConduitErrorCode err = sender_->SetExternalSendCodec(&cinst1, external_encoder_);
+    if (err != mozilla::kMediaConduitNoError)
+      return false;
+
     err = sender_->ConfigureSendMediaCodec(&cinst1);
     if (err != mozilla::kMediaConduitNoError)
       return false;
