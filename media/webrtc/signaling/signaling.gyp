@@ -85,6 +85,8 @@
         './src/media-conduit/AudioConduit.cpp',
         './src/media-conduit/VideoConduit.h',
         './src/media-conduit/VideoConduit.cpp',
+        './src/media-conduit/GmpVideoCodec.cpp',
+        './src/media-conduit/WebrtcGmpVideoCodec.cpp',
         './src/media-conduit/EventTimer.h',
         './src/media-conduit/VideoBenchmark.h',
         './src/media-conduit/VideoBenchmark.cpp',

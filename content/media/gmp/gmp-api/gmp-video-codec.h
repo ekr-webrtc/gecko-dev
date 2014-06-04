@@ -75,15 +75,33 @@ struct GMPVideoCodecVP8
   int32_t mKeyFrameInterval;
 };
 
+// H264 specific
+struct GMPVideoCodecH264
+{
+  uint8_t        mProfile;
+  uint8_t        mConstraints;
+  uint8_t        mLevel;
+  uint8_t        mPacketizationMode; // 0 or 1
+  bool           mFrameDroppingOn;
+  int            mKeyFrameInterval;
+  // These are null/0 if not externally negotiated
+  const uint8_t* mSPSData;
+  size_t         mSPSLen;
+  const uint8_t* mPPSData;
+  size_t         mPPSLen;
+};
+
 enum GMPVideoCodecType
 {
   kGMPVideoCodecVP8,
+  kGMPVideoCodecH264,
   kGMPVideoCodecInvalid // Should always be last.
 };
 
 union GMPVideoCodecUnion
 {
   GMPVideoCodecVP8 mVP8;
+  GMPVideoCodecH264 mH264;
 };
 
 // Simulcast is when the same stream is encoded multiple times with different

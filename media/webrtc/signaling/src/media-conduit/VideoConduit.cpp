@@ -80,6 +80,11 @@ WebrtcVideoConduit::~WebrtcVideoConduit()
     }
   }
 
+   if (mPtrExtCodec) {
+     mPtrExtCodec->Release();
+     mPtrExtCodec = NULL;
+   }
+
   //Deal with External Renderer
   if(mPtrViERender)
   {
@@ -304,6 +309,13 @@ MediaConduitErrorCode WebrtcVideoConduit::Init(WebrtcVideoConduit *other)
   if( !(mPtrViERender = ViERender::GetInterface(mVideoEngine)))
   {
     CSFLogError(logTag, "%s Unable to get video render interface ", __FUNCTION__);
+    return kMediaConduitSessionNotInited;
+  }
+
+  mPtrExtCodec = webrtc::ViEExternalCodec::GetInterface(mVideoEngine);
+  if (!mPtrExtCodec) {
+    CSFLogError(logTag, "%s Unable to get external codec interface: %d ",
+                __FUNCTION__,mPtrViEBase->LastError());
     return kMediaConduitSessionNotInited;
   }
 

@@ -224,6 +224,8 @@ public:
                       mVideoEngine(nullptr),
                       mTransport(nullptr),
                       mRenderer(nullptr),
+                      mPtrRTP(nullptr),
+                      mPtrExtCodec(nullptr),
                       mPtrExtCapture(nullptr),
                       mEngineTransmitting(false),
                       mEngineReceiving(false),
