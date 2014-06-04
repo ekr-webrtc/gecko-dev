@@ -199,7 +199,7 @@ DOMStorageDBThread::InsertDBOp(DOMStorageDBThread::DBOperation* aOperation)
 
   if (mStopIOThread) {
     // Thread use after shutdown demanded.
-    MOZ_ASSERT(false);
+    //    MOZ_ASSERT(false);
     return NS_ERROR_NOT_INITIALIZED;
   }
 

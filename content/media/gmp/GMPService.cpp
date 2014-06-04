@@ -310,7 +310,11 @@ GeckoMediaPluginService::GetDirectoriesToSearch(nsTArray<nsCOMPtr<nsIFile>> &aDi
   aDirs.AppendElement(searchDir);
 #elif defined(OS_POSIX)
   nsCOMPtr<nsIFile> searchDir = do_CreateInstance(NS_LOCAL_FILE_CONTRACTID);
+#ifndef MOZ_WIDGET_GONK
   nsresult rv = searchDir->InitWithPath(NS_LITERAL_STRING("/usr/lib/mozilla/plugins/"));
+#else
+  nsresult rv = searchDir->InitWithPath(NS_LITERAL_STRING("/data/plugins/"));
+#endif
   if (NS_FAILED(rv)) {
     return rv;
   }

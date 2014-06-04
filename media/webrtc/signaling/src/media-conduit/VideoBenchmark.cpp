@@ -13,6 +13,7 @@
 #include "nsIEventTarget.h"
 #include <MediaConduitInterface.h>
 #include "OMXVideoCodec.h"
+#include "GmpVideoCodec.h"
 #include "gfxPlatform.h"
 
 #ifdef MOZILLA_INTERNAL_API
@@ -30,6 +31,10 @@ namespace mozilla {
 
 static std::string g_input_file;
 static std::string g_encoded_output_file;
+static std::string g_codec("H264");
+static bool g_encode_hw = false;
+static bool g_decode_hw = false;
+
 FILE *g_encoded_output_fp = nullptr;
 static int g_width = 640;
 static int g_height = 480;
@@ -314,12 +319,18 @@ class Benchmark {
     if (!(receiver_ = mozilla::VideoSessionConduit::Create(nullptr)))
       return false;
 
-    external_decoder_ = OMXVideoCodec::CreateDecoder(OMXVideoCodec::CODEC_H264);
+    if (g_decode_hw) {
+      external_decoder_ = OMXVideoCodec::CreateDecoder(OMXVideoCodec::CODEC_H264);
+    }
+    else {
+      external_decoder_ = GmpVideoCodec::CreateDecoder();
+    }
+    
     if (!external_decoder_)
       return false;
 
     mozilla::VideoCodecConfig cinst1(120, "VP8", 0);
-    mozilla::VideoCodecConfig cinst2(124, "I420", 0);
+    mozilla::VideoCodecConfig cinst2(124, "H264_P0", 0);
     MediaConduitErrorCode err = receiver_->SetExternalRecvCodec(&cinst2, external_decoder_);
     if (err != mozilla::kMediaConduitNoError)
       return false;
@@ -381,20 +392,34 @@ class Benchmark {
 
     std::cerr << "Created conduit\n";
     
-    external_encoder_ = OMXVideoCodec::CreateEncoder(OMXVideoCodec::CODEC_H264);
+    if (g_encode_hw) {
+      external_encoder_ = OMXVideoCodec::CreateEncoder(OMXVideoCodec::CODEC_H264);
+    }
+    else {
+      std::cerr << "Creating GMP\n";
+      external_encoder_ = GmpVideoCodec::CreateEncoder();
+    }
     if (!external_encoder_)
       return false;
     std::cerr << "Created external encoder\n";
 
     std::cerr << "Set send codec encoder\n";
-    //mozilla::VideoCodecConfig cinst1(120, "VP8", 0);
-    mozilla::VideoCodecConfig cinst1(124, "I420", 0);
+    mozilla::VideoCodecConfig cinst1(120, "VP8", 0);
+    mozilla::VideoCodecConfig cinst2(124, "H264_P0", 0);
+    cinst2.mMaxFrameRate = 10;
+    MediaConduitErrorCode err = sender_->SetExternalSendCodec(&cinst2, external_encoder_);
 
-    MediaConduitErrorCode err = sender_->SetExternalSendCodec(&cinst1, external_encoder_);
     if (err != mozilla::kMediaConduitNoError)
       return false;
 
-    err = sender_->ConfigureSendMediaCodec(&cinst1);
+    if (g_codec == "VP8") {
+      err = sender_->ConfigureSendMediaCodec(&cinst1);
+    }
+    else {
+      std::cerr << "Configuring for H.264\n";
+      err = sender_->ConfigureSendMediaCodec(&cinst2);
+    }
+
     if (err != mozilla::kMediaConduitNoError)
       return false;
 
@@ -526,6 +551,18 @@ NS_IMETHODIMP VideoBenchmark::Handle(nsICommandLine *aCommandLine)
     rv = aCommandLine->HandleFlag(NS_LITERAL_STRING("video-benchmark-receive"), false, &found);
     g_send_and_receive = found;
 
+    rv = aCommandLine->HandleFlag(NS_LITERAL_STRING("video-benchmark-encode-hw"), false, &found);
+    g_encode_hw = found;
+
+    rv = aCommandLine->HandleFlag(NS_LITERAL_STRING("video-benchmark-decode-hw"), false, &found);
+    g_decode_hw = found;
+
+    tmp = GetArgument(NS_LITERAL_STRING("video-benchmark-codec"),
+                                  aCommandLine);
+    if (tmp.size()) {
+      g_codec = tmp;
+    }
+    
     ScopedDeletePtr<Benchmark> benchmark(Benchmark::Create(g_input_file));
     if (!benchmark) {
 	std::cerr << "Couldn't create benchmark" << std::endl;
