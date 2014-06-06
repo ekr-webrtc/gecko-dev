@@ -1,4 +1,3 @@
-/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -12,6 +11,7 @@
 #include "gmp-video-decode.h"
 #include "gmp-video-encode.h"
 #include "GMPPlatform.h"
+#include <iostream>
 
 #ifdef XP_WIN
 #include <stdlib.h> // for _exit()
@@ -27,10 +27,16 @@ GMPChild::GMPChild()
   , mGetAPIFunc(nullptr)
   , mGMPMessageLoop(MessageLoop::current())
 {
+  std::cerr << "PID=" << getpid() << std::endl;
+  PR_Sleep(30000);
 }
 
 GMPChild::~GMPChild()
 {
+}
+
+void child_exit(void) {
+  std::cerr << "SUBPROCESS: EXIT\n";
 }
 
 bool
@@ -39,6 +45,7 @@ GMPChild::Init(const std::string& aPluginPath,
                MessageLoop* aIOLoop,
                IPC::Channel* aChannel)
 {
+
   return LoadPluginLibrary(aPluginPath) &&
          Open(aChannel, aParentProcessHandle, aIOLoop);
 }
@@ -48,18 +55,22 @@ GMPChild::LoadPluginLibrary(const std::string& aPluginPath)
 {
   nsDependentCString pluginPath(aPluginPath.c_str());
 
+  std::cerr << "SUBPROCESS\n";
+
   nsCOMPtr<nsIFile> libFile;
   nsresult rv = NS_NewNativeLocalFile(pluginPath, true, getter_AddRefs(libFile));
   if (NS_FAILED(rv)) {
     return false;
   }
 
+  std::cerr << "SUBPROCESS:" << __FUNCTION__ << ":" << __LINE__ << "\n";
   nsAutoString leafName;
   if (NS_FAILED(libFile->GetLeafName(leafName))) {
     return false;
   }
   nsAutoString baseName(Substring(leafName, 4, leafName.Length() - 1));
 
+  std::cerr << "SUBPROCESS:" << __FUNCTION__ << ":" << __LINE__ << "\n";
 #if defined(XP_MACOSX)
   nsAutoString binaryName = NS_LITERAL_STRING("lib") + baseName + NS_LITERAL_STRING(".dylib");
 #elif defined(OS_POSIX)
@@ -71,10 +82,13 @@ GMPChild::LoadPluginLibrary(const std::string& aPluginPath)
 #endif
   libFile->AppendRelativePath(binaryName);
 
+  std::cerr << "SUBPROCESS:" << __FUNCTION__ << ":" << __LINE__ << "\n";
   nsAutoCString nativePath;
   libFile->GetNativePath(nativePath);
+  std::cerr << "SUBPROCESS:" << __FUNCTION__ << ":" << __LINE__ << "\n";  
   mLib = PR_LoadLibrary(nativePath.get());
   if (!mLib) {
+    std::cerr << "SUBPROCESS:" << __FUNCTION__ << ":" << __LINE__ << "\n";  
     return false;
   }
 
@@ -83,6 +97,7 @@ GMPChild::LoadPluginLibrary(const std::string& aPluginPath)
     return false;
   }
 
+  std::cerr << "SUBPROCESS:" << __FUNCTION__ << ":" << __LINE__ << "\n";
   auto platformAPI = new GMPPlatformAPI();
   InitPlatformAPI(*platformAPI);
 
@@ -90,11 +105,14 @@ GMPChild::LoadPluginLibrary(const std::string& aPluginPath)
     return false;
   }
 
+  std::cerr << "SUBPROCESS:" << __FUNCTION__ << ":" << __LINE__ << "\n";
+
   mGetAPIFunc = reinterpret_cast<GMPGetAPIFunc>(PR_FindFunctionSymbol(mLib, "GMPGetAPI"));
   if (!mGetAPIFunc) {
     return false;
   }
 
+  std::cerr << "SUBPROCESS:" << __FUNCTION__ << ":" << __LINE__ << "\n";
   return true;
 }
 
@@ -116,6 +134,7 @@ GMPChild::ActorDestroy(ActorDestroyReason aWhy)
 
   if (AbnormalShutdown == aWhy) {
     NS_WARNING("Abnormal shutdown of GMP process!");
+    std::cerr << "SUBPROCESS: abnormal shutdown\n";
     _exit(0);
   }
 
@@ -127,6 +146,7 @@ GMPChild::ProcessingError(Result aWhat)
 {
   switch (aWhat) {
     case MsgDropped:
+      std::cerr << "SUBPROCESS: processing error\n";
       _exit(0); // Don't trigger a crash report.
     case MsgNotKnown:
       MOZ_CRASH("aborting because of MsgNotKnown");
@@ -184,6 +204,7 @@ GMPChild::RecvPGMPVideoDecoderConstructor(PGMPVideoDecoderChild* aActor)
 
   vdc->Init(static_cast<GMPVideoDecoder*>(vd));
 
+  std::cerr << "SUBPROCESS:" << __FUNCTION__ << ":" << __LINE__ << "\n";
   return true;
 }
 
@@ -192,6 +213,8 @@ GMPChild::RecvPGMPVideoEncoderConstructor(PGMPVideoEncoderChild* aActor)
 {
   auto vec = static_cast<GMPVideoEncoderChild*>(aActor);
 
+  std::cerr << "SUBPROCESS:" << __FUNCTION__ << ":" << __LINE__ << "\n";
+
   void* ve = nullptr;
   GMPErr err = mGetAPIFunc("encode-video", &vec->Host(), &ve);
   if (err != GMPNoErr || !ve) {
@@ -199,6 +222,8 @@ GMPChild::RecvPGMPVideoEncoderConstructor(PGMPVideoEncoderChild* aActor)
   }
 
   vec->Init(static_cast<GMPVideoEncoder*>(ve));
+
+  std::cerr << "SUBPROCESS:" << __FUNCTION__ << ":" << __LINE__ << "\n";
 
   return true;
 }

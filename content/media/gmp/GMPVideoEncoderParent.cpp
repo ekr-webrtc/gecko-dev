@@ -3,6 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+
+#include <iostream>
 #include "GMPVideoEncoderParent.h"
 #include "GMPVideoi420FrameImpl.h"
 #include "GMPVideoEncodedFrameImpl.h"
@@ -94,6 +96,8 @@ GMPVideoEncoderParent::Encode(GMPVideoi420Frame* aInputFrame,
 {
   nsAutoRef<GMPVideoi420Frame> frameRef(aInputFrame);
 
+  std::cerr << "PARENT:" << __FUNCTION__ << ":" << __LINE__ << "\n";
+
   if (!mCanSendMessages) {
     NS_WARNING("Trying to use an invalid GMP video encoder!");
     return GMPVideoGenericErr;
@@ -106,6 +110,8 @@ GMPVideoEncoderParent::Encode(GMPVideoi420Frame* aInputFrame,
   GMPVideoi420FrameData frameData;
   inputFrameImpl->InitFrameData(frameData);
 
+  std::cerr << "PARENT:" << __FUNCTION__ << ":" << __LINE__ << "\n";
+
   InfallibleTArray<int> frameTypes;
   frameTypes.SetCapacity(aFrameTypes.size());
   for (std::vector<int>::size_type i = 0; i != aFrameTypes.size(); i++) {
@@ -117,6 +123,8 @@ GMPVideoEncoderParent::Encode(GMPVideoi420Frame* aInputFrame,
                   frameTypes)) {
     return GMPVideoGenericErr;
   }
+
+  std::cerr << "PARENT:" << __FUNCTION__ << ":" << __LINE__ << "\n";
 
   // Async IPC, we don't have access to a return value.
   return GMPVideoNoErr;

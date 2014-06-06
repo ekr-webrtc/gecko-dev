@@ -250,7 +250,9 @@ uint32_t GeckoChildProcessHost::GetSupportedArchitecturesForProcessType(GeckoPro
 void
 GeckoChildProcessHost::PrepareLaunch()
 {
+  // TODO (ekr@rtfm.com): Reenable
 #ifdef MOZ_CRASHREPORTER
+#error("EKR")
   if (CrashReporter::GetEnabled()) {
     CrashReporter::OOPInit();
   }

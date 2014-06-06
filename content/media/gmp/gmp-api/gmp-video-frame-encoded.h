@@ -57,6 +57,8 @@ enum GMPVideoFrameType
 class GMPVideoEncodedFrame : public GMPVideoFrame
 {
 public:
+  virtual ~GMPVideoEncodedFrame() {}
+
   // MAIN THREAD ONLY
   virtual GMPVideoErr CreateEmptyFrame(uint32_t aSize) = 0;
   // MAIN THREAD ONLY

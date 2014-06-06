@@ -58,6 +58,8 @@ enum GMPPlaneType {
 // thread. They are marked below.
 class GMPVideoi420Frame : public GMPVideoFrame {
 public:
+  virtual ~GMPVideoi420Frame() {}
+
   // MAIN THREAD ONLY
   // CreateEmptyFrame: Sets frame dimensions and allocates buffers based
   // on set dimensions - height and plane stride.

@@ -406,7 +406,9 @@ class Benchmark {
     std::cerr << "Set send codec encoder\n";
     mozilla::VideoCodecConfig cinst1(120, "VP8", 0);
     mozilla::VideoCodecConfig cinst2(124, "H264_P0", 0);
+
     cinst2.mMaxFrameRate = 10;
+
     MediaConduitErrorCode err = sender_->SetExternalSendCodec(&cinst2, external_encoder_);
 
     if (err != mozilla::kMediaConduitNoError)

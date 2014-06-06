@@ -48,6 +48,8 @@
 // thread. They are marked below.
 class GMPPlane {
 public:
+  virtual ~GMPPlane() {}
+
   // MAIN THREAD ONLY
   // CreateEmptyPlane - set allocated size, actual plane size and stride:
   // If current size is smaller than current size, then a buffer of sufficient

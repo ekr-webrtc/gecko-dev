@@ -5,6 +5,7 @@
 
 #include "GMPVideoEncoderChild.h"
 #include "GMPChild.h"
+#include <iostream>
 #include <stdio.h>
 #include "mozilla/unused.h"
 #include "GMPVideoEncodedFrameImpl.h"
@@ -28,6 +29,7 @@ GMPVideoEncoderChild::~GMPVideoEncoderChild()
 void
 GMPVideoEncoderChild::Init(GMPVideoEncoder* aEncoder)
 {
+  std::cerr << "SUBPROCESS:" << __FUNCTION__ << ":" << __LINE__ << "\n";
   MOZ_ASSERT(aEncoder, "Cannot initialize video encoder child without a video encoder!");
   mVideoEncoder = aEncoder;
 }
@@ -77,6 +79,8 @@ GMPVideoEncoderChild::RecvInitEncode(const GMPVideoCodec& aCodecSettings,
                                      const int32_t& aNumberOfCores,
                                      const uint32_t& aMaxPayloadSize)
 {
+  std::cerr << "CHILD:" << __FUNCTION__ << ":" << __LINE__ << std::endl;
+
   if (!mVideoEncoder) {
     return false;
   }
@@ -92,6 +96,7 @@ GMPVideoEncoderChild::RecvEncode(const GMPVideoi420FrameData& aInputFrame,
                                  const GMPCodecSpecificInfo& aCodecSpecificInfo,
                                  const InfallibleTArray<int>& aFrameTypes)
 {
+  
   if (!mVideoEncoder) {
     return false;
   }

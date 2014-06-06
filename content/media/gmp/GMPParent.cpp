@@ -3,6 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#include <iostream>
 #include "GMPParent.h"
 #include "nsComponentManagerUtils.h"
 #include "nsComponentManagerUtils.h"
@@ -223,20 +224,25 @@ GMPParent::GetGMPVideoDecoder(GMPVideoDecoderParent** aGMPVD)
 nsresult
 GMPParent::GetGMPVideoEncoder(GMPVideoEncoderParent** aGMPVE)
 {
+  std::cerr << "PARENT:" << __FUNCTION__ << ":" << __LINE__ << "\n";
   MOZ_ASSERT(GMPThread() == NS_GetCurrentThread());
 
   if (!EnsureProcessLoaded()) {
     return NS_ERROR_FAILURE;
   }
 
+  std::cerr << "PARENT:" << __FUNCTION__ << ":" << __LINE__ << "\n";
+
   PGMPVideoEncoderParent* pvep = SendPGMPVideoEncoderConstructor();
   if (!pvep) {
     return NS_ERROR_FAILURE;
   }
+  
+  std::cerr << "PARENT:" << __FUNCTION__ << ":" << __LINE__ << "\n";
   nsRefPtr<GMPVideoEncoderParent> vep = static_cast<GMPVideoEncoderParent*>(pvep);
   mVideoEncoders.AppendElement(vep);
   vep.forget(aGMPVE);
-
+  std::cerr << "PARENT:" << __FUNCTION__ << ":" << __LINE__ << "\n";
   return NS_OK;
 }
 

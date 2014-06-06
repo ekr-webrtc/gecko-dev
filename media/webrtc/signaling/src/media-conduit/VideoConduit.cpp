@@ -535,8 +535,8 @@ WebrtcVideoConduit::ConfigureSendMediaCodec(const VideoCodecConfig* codecConfig)
     CSFLogError(logTag, "%s Configuring External H264 Send Codec", __FUNCTION__);
 
     // width/height will be overridden on the first frame
-    video_codec.width = 320;
-    video_codec.height = 240;
+    video_codec.width = 176;
+    video_codec.height = 144;
     video_codec.qpMax = 56;
     video_codec.numberOfSimulcastStreams = 1;
     video_codec.mode = webrtc::kRealtimeVideo;

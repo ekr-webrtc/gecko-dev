@@ -44,6 +44,7 @@ enum GMPVideoFrameFormat {
 
 class GMPVideoFrame {
 public:
+  virtual ~GMPVideoFrame() {}
   virtual GMPVideoFrameFormat GetFrameFormat() = 0;
   // MAIN THREAD ONLY IF OWNING PROCESS
   virtual void Destroy() = 0;
